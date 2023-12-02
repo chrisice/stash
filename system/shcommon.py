@@ -16,28 +16,26 @@ IN_PYTHONISTA = sys.executable.find('Pythonista') >= 0
 
 if IN_PYTHONISTA:
     import plistlib
+    with open(os.path.join(os.path.dirname(sys.executable), 'Info.plist'), 'rb') as fp:
+        _properties = plistlib.load(fp)
+        PYTHONISTA_VERSION = _properties['CFBundleShortVersionString']
+        PYTHONISTA_VERSION_LONG = _properties['CFBundleVersion']
 
-with open(os.path.join(os.path.dirname(sys.executable), 'Info.plist'), 'rb') as fp:
-    _properties = plistlib.load(fp)
-    PYTHONISTA_VERSION = _properties['CFBundleShortVersionString']
-    PYTHONISTA_VERSION_LONG = _properties['CFBundleVersion']
-
-    if PYTHONISTA_VERSION < '3.0':
-        python_capi = ctypes.pythonapi
-    else:
-        # The default pythonapi always points to Python 3 in Pythonista 3
-        if six.PY3:
+        if PYTHONISTA_VERSION < '3.0':
             python_capi = ctypes.pythonapi
         else:
-            # We need to load the Python 2 API manually
-            try:
-                python_capi = ctypes.PyDLL(os.path.join(os.path.dirname(sys.executable), 'Frameworks/Py2Kit.framework/Py2Kit'))
-            except OSError:
-                python_capi = ctypes.PyDLL(
-                    os.path.join(os.path.dirname(sys.executable),
-                                 'Frameworks/PythonistaKit.framework/PythonistaKit')
-                )
-
+            # The default pythonapi always points to Python 3 in Pythonista 3
+            if six.PY3:
+                python_capi = ctypes.pythonapi
+            else:
+                # We need to load the Python 2 API manually
+                try:
+                    python_capi = ctypes.PyDLL(os.path.join(os.path.dirname(sys.executable), 'Frameworks/Py2Kit.framework/Py2Kit'))
+                except OSError:
+                    python_capi = ctypes.PyDLL(
+                        os.path.join(os.path.dirname(sys.executable),
+                                     'Frameworks/PythonistaKit.framework/PythonistaKit')
+                    )
 else:
     PYTHONISTA_VERSION = '0.0'
     PYTHONISTA_VERSION_LONG = '000000'
